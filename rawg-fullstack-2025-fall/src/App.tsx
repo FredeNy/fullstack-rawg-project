@@ -1,35 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import { Grid, GridItem, Show } from "@chakra-ui/react";
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+import "./App.css";
+import { GameGrid } from "./components/GameGrid";
+import GenreList from "./components/GenreList";
+import { NavBar } from "./components/NavBar";
+import PlatformSelector from "./components/PlatformSelector";
+import StoreList from "./components/StoreList";
+import type { Platform } from "./hooks/useGames";
+import type { Genre } from "./hooks/useGenres";
+import type { Store } from "./hooks/useStores";
+
+export interface GameQuery {
+  genre: Genre | null;
+  platform: Platform | null;
+  store: Store | null;
 }
 
-export default App
+function App() {
+  const [gameQuery, setGameQuery] = useState<GameQuery>({} as GameQuery);
+
+  const handleSelectGenre = (genre: Genre | null) => {
+    setGameQuery((prev) => ({ ...prev, genre }));
+  };
+
+  const handleSelectPlatform = (platform: Platform | null) => {
+    setGameQuery((prev) => ({ ...prev, platform }));
+  };
+
+  const handleSelectStore = (store: Store | null) => {
+    setGameQuery((prev) => ({ ...prev, store }));
+  };
+
+  return (
+    <Grid
+      templateAreas={{ base: `"nav" "main"`, lg: `"nav nav" "aside main"` }}
+      templateColumns={{ base: "1fr", lg: "200px 1fr" }}
+    >
+      <GridItem pl="2" area={"nav"}>
+        <NavBar />
+      </GridItem>
+      <Show above="lg">
+        <GridItem pl="2" area={"aside"}>
+          <GenreList
+            onSelectGenre={handleSelectGenre}
+            selectedGenre={gameQuery.genre}
+          />
+          <StoreList
+            onSelectStore={handleSelectStore}
+            selectedStore={gameQuery.store}
+          />
+        </GridItem>
+      </Show>
+      <GridItem pl="2" area={"main"}>
+        <PlatformSelector
+          onSelectPlatform={handleSelectPlatform}
+          selectedPlatform={gameQuery.platform}
+        />
+        <GameGrid gameQuery={gameQuery} />
+      </GridItem>
+    </Grid>
+  );
+}
+
+export default App;
